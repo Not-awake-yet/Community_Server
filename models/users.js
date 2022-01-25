@@ -6,18 +6,32 @@ module.exports = {
         return User.create(user).exec();
     },
 
-    // 通过账号获取用户信息
-    getUserByAccount: function getUserByAccount (account) {
+    // 通过ID获取用户信息
+    getUserByID: function getUserByID (id) {
         return User
-            .findOne({ account: account })
+            .findOne({ _id: id })
             .addCreatedAt()
             .exec()
     },
 
     // 修改用户密码
-    changeUserPW: function changeUserPW (account, password) {
+    changeUserPW: function changeUserPW (id, password) {
         return User
-            .updateOne({ account: account }, { $set: { password: password }})
+            .updateOne({ _id: id }, { $set: { password: password }})
+            .exec()
+    },
+
+    // 修改用户头像
+    changeUserAV: function changeUserAV (id, avatar) {
+        return User
+            .updateOne({ _id: id}, { $set: { avatar: avatar }})
+            .exec()
+    },
+
+    // 修改用户信息
+    changeUserInfo: function changeUserInfo (id, info) {
+        return User
+            .updateOne({ _id: id}, { $set: info})
             .exec()
     }
 }

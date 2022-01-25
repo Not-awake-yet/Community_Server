@@ -27,7 +27,7 @@ module.exports = {
     USER_LOGIN_ERROR: new ResultCode(4007, "账号或密码错误, 请输入正确的账号和密码"),
     USER_NOT_EXIST: new ResultCode(4008, "该用户不存在"),
     USER_HAS_EXISTED: new ResultCode(4009, "该用户已存在"),
-    POST_EDIT_ERROR: new ResultCode(4010, "编辑日记错误"),
+    POST_EDIT_ERROR: new ResultCode(4010, "编辑文章错误"),
     POST_DELETE_ERROR: new ResultCode(4011, "删除文章错误"),
     FIND_ERROR: new ResultCode(4012, "查找文章错误"),
 

@@ -63,8 +63,8 @@ router.post("/", function (req, res) {
       });
     }
 
-    // // 密码匹配成功
-    // // 将用户 ID 写入 token, 生成加签后的token
+    // 密码匹配成功
+    // 将用户 ID 写入 token, 生成加签后的token
     let token = jwt.sign({ _id: user._id }, config.key, { expiresIn: "1h" });
 
     return res.json({

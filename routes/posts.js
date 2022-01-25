@@ -5,24 +5,21 @@ const Result = require("../utils/result");
 const PostModel = require("../models/posts");
 const checkLogin = require("../middlewares/check").checkLogin;
 
-// POST /posts/create 添加一篇日记
+// POST /posts/create 添加一篇文章
 router.post("/create", checkLogin, function (req, res) {
   const author = req.user._id;
-  const { title, content, typeId, createDate } = req.fields;
+  const { title, content, typeId } = req.fields;
 
   // 校验参数
   try {
     if (!title.length) {
-      throw new Error("缺失日记标题");
+      throw new Error("缺失文章标题");
     }
     if (!content.length) {
-      throw new Error("缺失日记内容");
+      throw new Error("缺失文章内容");
     }
     if (!typeId.length) {
       throw new Error("缺失种类信息");
-    }
-    if (!createDate.length) {
-      throw new Error("缺失上传日期");
     }
   } catch (e) {
     return res.json({
@@ -43,10 +40,9 @@ router.post("/create", checkLogin, function (req, res) {
     title: title,
     content: content,
     type: typeId,
-    createDate: createDate,
   };
 
-  // 向数据库插入日记信息
+  // 向数据库插入文章信息
   PostModel.create(post)
     .then(function (data) {
       // 插入成功, 返回成功信息
@@ -76,7 +72,7 @@ router.post("/create", checkLogin, function (req, res) {
     });
 });
 
-// GET /posts/:postId/remove 删除一篇日记
+// GET /posts/:postId/remove 删除一篇文章
 router.get("/:postId/remove", checkLogin, function (req, res) {
   const postId = req.params.postId;
   const author = req.user._id;
@@ -85,8 +81,8 @@ router.get("/:postId/remove", checkLogin, function (req, res) {
     .then(function (post) {
       try {
         if (!post) {
-          // 日记不存在
-          throw new Error("删除的日记不存在");
+          // 文章不存在
+          throw new Error("删除的文章不存在");
         }
         if (post.author._id.toString() !== author.toString()) {
           // 用户权限不够
@@ -121,7 +117,7 @@ router.get("/:postId/remove", checkLogin, function (req, res) {
             });
           });
       } catch (e) {
-        // 用户的权限不够或者删除日记不存在
+        // 用户的权限不够或者删除文章不存在
         return res.json({
           status: "failure",
           result: {
@@ -149,7 +145,7 @@ router.get("/:postId/remove", checkLogin, function (req, res) {
     });
 });
 
-// POST /posts/:postId/edit 修改一篇日记
+// POST /posts/:postId/edit 修改一篇文章
 router.post("/:postId/edit", checkLogin, function (req, res) {
   const postId = req.params.postId;
   const author = req.user._id;
@@ -157,22 +153,22 @@ router.post("/:postId/edit", checkLogin, function (req, res) {
 
   try {
     if (!title.length) {
-      throw new Error("缺失日记题目");
+      throw new Error("缺失文章题目");
     }
     if (!content.length) {
-      throw new Error("缺失日记内容");
+      throw new Error("缺失文章内容");
     }
     if (!typeId.length) {
-      throw new Error("缺失日记类型");
+      throw new Error("缺失文章类型");
     }
 
     // 参数校验通过
     PostModel.getRawPostById(author, postId)
       .then(function (post) {
         try {
-          // 日记不存在
+          // 文章不存在
           if (!post) {
-            throw new Error("编辑的日记不存在");
+            throw new Error("编辑的文章不存在");
           }
 
           // 权限不够
@@ -251,7 +247,7 @@ router.post("/:postId/edit", checkLogin, function (req, res) {
   }
 });
 
-// GET /posts/:postId 查看一篇日记
+// GET /posts/:postId 查看一篇文章
 router.get("/:postId", checkLogin, function (req, res) {
   const author = req.user._id;
   const postId = req.params.postId;
@@ -271,7 +267,7 @@ router.get("/:postId", checkLogin, function (req, res) {
         });
       }
 
-      // 日记存在, 返回日记信息
+      // 文章存在, 返回文章信息
       return res.json({
         status: "success",
         result: {

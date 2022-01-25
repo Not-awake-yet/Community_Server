@@ -55,7 +55,7 @@ router.get("/now", checkLogin, function (req, res) {
   });
 });
 
-// POST /times/memory 获取指定时间的日记
+// POST /times/memory 获取指定时间的文章
 router.post("/memory", checkLogin, function (req, res) {
   const { time } = req.fields;
   const author = req.user._id;

@@ -6,7 +6,7 @@ const PostModel = require('../models/posts');
 const Result = require('../utils/result');
 const checkLogin = require('../middlewares/check').checkLogin;
 
-// 创建一个新的日记类型
+// 创建一个新的文章类型
 router.post('/create', checkLogin, function (req, res) {
     const { type } = req.fields;
 
@@ -50,7 +50,7 @@ router.post('/create', checkLogin, function (req, res) {
     });
 });
 
-// GET /types/alltype 返回所有的日记种类和种类背景图片URL
+// GET /types/alltype 返回所有的文章种类和种类背景图片URL
 router.get('/alltype', checkLogin, function (req, res) {
     TypeModel.getAllTypes().then(function (types) {        
         // 查找成功, 返回所有的种类值
@@ -78,7 +78,7 @@ router.get('/alltype', checkLogin, function (req, res) {
     });
 });
 
-// GET /types/:typeId 返回指定种类的所有日记以及该种类背景图片URL
+// GET /types/:typeId 返回指定种类的所有文章以及该种类背景图片URL
 router.get('/:typeId', checkLogin, function (req, res) {
     const author = req.user._id;
     const typeId = req.params.typeId;

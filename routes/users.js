@@ -6,11 +6,11 @@ const Result = require("../utils/result");
 const UserModel = require("../models/users");
 const checkLogin = require("../middlewares/check").checkLogin;
 
-// GET /users/:account 返回指定用户信息
-router.get("/:account", checkLogin, function (req, res) {
-  const account = req.params.account;
+// GET /users/getInfo 返回指定用户信息
+router.get("/getInfo", checkLogin, function (req, res) {
+  const author = req.user._id;
 
-  UserModel.getUserByAccount(account)
+  UserModel.getUserByID(account)
     .then(function (user) {
       // 用户不存在，返回错误信息
       if (!user) {
@@ -138,5 +138,9 @@ router.post("/changepw", function (req, res) {
     });
   }
 });
+
+// POST /users/chavatar  修改用户头像
+
+// POST /users/changeif
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const Type = require("../lib/mongo").Types;
 
 module.exports = {
-    // 创建一个日记种类
+    // 创建一个文章种类
     create: function create(typeName) {
         return Type.create({ typeName: typeName }).exec()
     },
