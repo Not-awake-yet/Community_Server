@@ -9,7 +9,7 @@ const expressWinston = require('express-winston');
 const SERVER_INTERNAL_ERROR = require('./utils/result').SERVER_INTERNAL_ERROR;
 
 const app = express();
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 
 // 处理请求信息的中间件
 app.use(require('express-formidable')());

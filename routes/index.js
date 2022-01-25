@@ -1,4 +1,5 @@
-const API_NOT_EXIST = require("../utils/result").API_NOT_EXIST;
+const { API_NOT_EXIST } = require("../utils/resultcode");
+const { failure } = require("../utils/result");
 
 module.exports = function (app) {
   // 注册接口
@@ -13,27 +14,19 @@ module.exports = function (app) {
   // 类型相关接口
   app.use("/types", require("./types"));
 
-  // 时间相关接口
-  app.use("/times", require("./times"));
-
   // 用户相关接口
   app.use("/users", require("./users"));
+
+  // 评论相关接口
+  app.use('/comments', require('./comments'));
 
   // 定义404处理机制
   app.use(function (req, res) {
     // console.log(res.headersSend);
 
     if (!res.headersSend) {
-      return res.status(404).json({
-        status: "failure",
-        result: {
-          code: API_NOT_EXIST.code,
-          message: {
-            type: API_NOT_EXIST.message,
-            info: API_NOT_EXIST.message,
-          },
-        },
-      });
+      res.status(404);
+      return failure(res, API_NOT_EXIST)
     }
   });
 };
