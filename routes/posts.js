@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
-
-const Result = require("../utils/result");
 const PostModel = require("../models/posts");
-const checkLogin = require("../middlewares/check").checkLogin;
+const ResCode = require("../utils/resultcode");
+const { success, failure } = require("../utils/result");
+const { checkLogin } = require("../middlewares/check");
 
 // POST /posts/create 添加一篇文章
-router.post("/create", checkLogin, function (req, res) {
+router.post("/create", checkLogin, function (req, res, next) {
   const author = req.user._id;
   const { title, content, typeId } = req.fields;
 
@@ -22,16 +22,11 @@ router.post("/create", checkLogin, function (req, res) {
       throw new Error("缺失种类信息");
     }
   } catch (e) {
-    return res.json({
-      status: "failure",
-      result: {
-        code: Result.PARAM_NOT_COMPLETE.code,
-        message: {
-          type: Result.PARAM_NOT_COMPLETE.message,
-          info: e.message,
-        },
-      },
-    });
+    const other = {
+      info: e.message,
+    };
+
+    return failure(res, ResCode.PARAM_NOT_COMPLETE, undefined, other);
   }
 
   // 验证通过
@@ -46,38 +41,21 @@ router.post("/create", checkLogin, function (req, res) {
   PostModel.create(post)
     .then(function (data) {
       // 插入成功, 返回成功信息
-      return res.json({
-        status: "success",
-        result: {
-          code: Result.ADD_SUCCESS.code,
-          message: {
-            type: Result.ADD_SUCCESS.message,
-            info: "文章 Id：" + data.ops[0]._id,
-          },
-        },
-      });
+      const other = {
+        info: "新建文章 Id: " + data.ops[0]._id,
+      };
+
+      return success(res, ResCode.SUCCESS, undefined, other);
     })
-    .catch(function () {
-      // 插入失败,返回错误信息
-      return res.json({
-        status: "failure",
-        result: {
-          code: Result.OTHER_ERROR.code,
-          message: {
-            type: Result.OTHER_ERROR.message,
-            info: "发生了未知的其他错误",
-          },
-        },
-      });
-    });
+    .catch(next);
 });
 
 // GET /posts/:postId/remove 删除一篇文章
-router.get("/:postId/remove", checkLogin, function (req, res) {
+router.get("/:postId/remove", checkLogin, function (req, res, next) {
   const postId = req.params.postId;
   const author = req.user._id;
 
-  PostModel.getRawPostById(author, postId)
+  PostModel.getRawPostById(postId)
     .then(function (post) {
       try {
         if (!post) {
@@ -92,61 +70,27 @@ router.get("/:postId/remove", checkLogin, function (req, res) {
         PostModel.delPostById(postId)
           .then(function () {
             // 删除成功, 返回成功信息
-            return res.json({
-              status: "success",
-              result: {
-                code: Result.DELETE_SUCCESS.code,
-                message: {
-                  type: Result.DELETE_SUCCESS.message,
-                  info: "删除文章的标题：" + post.title,
-                },
-              },
-            });
+            const other = {
+              info: "删除文章的标题: " + post.title,
+            };
+
+            return success(res, ResCode.SUCCESS, undefined, other);
           })
-          .catch(function () {
-            //  删除失败，返回错误信息
-            return res.json({
-              status: "failure",
-              result: {
-                code: Result.OTHER_ERROR.code,
-                message: {
-                  type: Result.OTHER_ERROR.message,
-                  info: "发生了未知的其他错误",
-                },
-              },
-            });
-          });
+          .catch(next);
       } catch (e) {
         // 用户的权限不够或者删除文章不存在
-        return res.json({
-          status: "failure",
-          result: {
-            code: Result.POST_DELETE_ERROR.code,
-            message: {
-              type: Result.POST_DELETE_ERROR.message,
-              info: e.message,
-            },
-          },
-        });
+        const other = {
+          info: e.message,
+        };
+
+        failure(res, ResCode.PARAM_IS_INVALID, undefined, other);
       }
     })
-    .catch(function () {
-      //  删除失败，返回错误信息
-      return res.json({
-        status: "failure",
-        result: {
-          code: Result.OTHER_ERROR.code,
-          message: {
-            type: Result.OTHER_ERROR.message,
-            info: "发生了未知的其他错误",
-          },
-        },
-      });
-    });
+    .catch(next);
 });
 
 // POST /posts/:postId/edit 修改一篇文章
-router.post("/:postId/edit", checkLogin, function (req, res) {
+router.post("/:postId/edit", checkLogin, function (req, res, next) {
   const postId = req.params.postId;
   const author = req.user._id;
   const { title, content, typeId } = req.fields;
@@ -183,67 +127,27 @@ router.post("/:postId/edit", checkLogin, function (req, res) {
           })
             .then(function () {
               // 编辑成功, 返回成功的信息
-              return res.json({
-                status: "success",
-                result: {
-                  code: Result.EDIT_SUCCESS.code,
-                  message: {
-                    type: Result.EDIT_SUCCESS.message,
-                    info: "编辑文章的标题：" + post.title,
-                  },
-                },
-              });
+              const message = {
+                info: "编辑文章的标题: " + post.title,
+              };
+              return success(res, ResCode.SUCCESS, undefined, other);
             })
-            .catch(function () {
-              //  编辑失败，返回错误信息
-              return res.json({
-                status: "failure",
-                result: {
-                  code: Result.OTHER_ERROR.code,
-                  message: {
-                    type: Result.OTHER_ERROR.message,
-                    info: "发生了未知的其他错误",
-                  },
-                },
-              });
-            });
+            .catch(next);
         } catch (e) {
-          return res.json({
-            status: "failure",
-            result: {
-              code: Result.POST_EDIT_ERROR.code,
-              message: {
-                type: Result.POST_EDIT_ERROR.message,
-                info: e.message,
-              },
-            },
-          });
+          const other = {
+            info: e.message,
+          };
+
+          return failure(res, ResCode.PARAM_IS_INVALID, undefined, other);
         }
       })
-      .catch(function () {
-        //  编辑失败，返回错误信息
-        return res.json({
-          status: "failure",
-          result: {
-            code: Result.OTHER_ERROR.code,
-            message: {
-              type: Result.OTHER_ERROR.message,
-              info: "发生了未知的其他错误",
-            },
-          },
-        });
-      });
+      .catch(next);
   } catch (e) {
-    return res.json({
-      status: "failure",
-      result: {
-        code: Result.PARAM_NOT_COMPLETE.code,
-        message: {
-          type: Result.PARAM_NOT_COMPLETE.message,
-          info: e.message,
-        },
-      },
-    });
+    const other = {
+      info: e.message,
+    };
+
+    return failure(res, ResCode.PARAM_NOT_COMPLETE, undefined, other);
   }
 });
 
@@ -258,9 +162,9 @@ router.get("/:postId", checkLogin, function (req, res) {
         return res.json({
           status: "failure",
           result: {
-            code: Result.POST_NOT_EXIT.code,
+            code: ResCode.POST_NOT_EXIT.code,
             message: {
-              type: Result.POST_NOT_EXIT.message,
+              type: ResCode.POST_NOT_EXIT.message,
               info: "",
             },
           },
@@ -271,9 +175,9 @@ router.get("/:postId", checkLogin, function (req, res) {
       return res.json({
         status: "success",
         result: {
-          code: Result.FIND_SUCCESS.code,
+          code: ResCode.FIND_SUCCESS.code,
           message: {
-            type: Result.FIND_SUCCESS.message,
+            type: ResCode.FIND_SUCCESS.message,
             info: post,
           },
         },
@@ -283,9 +187,9 @@ router.get("/:postId", checkLogin, function (req, res) {
       return res.json({
         status: "failure",
         result: {
-          code: Result.OTHER_ERROR.code,
+          code: ResCode.OTHER_ERROR.code,
           message: {
-            type: Result.OTHER_ERROR.message,
+            type: ResCode.OTHER_ERROR.message,
             info: "发生了未知的其他错误",
           },
         },

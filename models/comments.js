@@ -1,50 +1,49 @@
-const marked = require('marked')
-const Comment = require('../lib/mongo').Comment
+const marked = require("marked");
+const Comment = require("../lib/mongo").Comments;
 
 // 将 comment 的 content 从 markdown 转换成 html
-Comment.plugin('contentToHtml', {
+Comment.plugin("contentToHtml", {
   afterFind: function (comments) {
     return comments.map(function (comment) {
-      comment.content = marked(comment.content)
-      return comment
-    })
-  }
-})
+      comment.content = marked(comment.content);
+      return comment;
+    });
+  },
+});
 
 module.exports = {
   // 创建一个评论
-  create: function create (comment) {
-    return Comment.create(comment).exec()
+  create: function create(comment) {
+    return Comment.create(comment).exec();
   },
 
   // 通过评论 id 获取一个评论
-  getCommentById: function getCommentById (commentId) {
-    return Comment.findOne({ _id: commentId }).exec()
+  getCommentById: function getCommentById(commentId) {
+    return Comment.findOne({ _id: commentId }).exec();
   },
 
   // 通过评论 id 删除一个评论
-  delCommentById: function delCommentById (commentId) {
-    return Comment.deleteOne({ _id: commentId }).exec()
+  delCommentById: function delCommentById(commentId) {
+    return Comment.deleteOne({ _id: commentId }).exec();
   },
 
   // 通过文章 id 删除该文章下所有评论
-  delCommentsByPostId: function delCommentsByPostId (postId) {
-    return Comment.deleteMany({ postId: postId }).exec()
+  delCommentsByPostId: function delCommentsByPostId(postId) {
+    return Comment.deleteMany({ postId: postId }).exec();
   },
 
-  // 通过文章 id 获取该文章下所有评论，按评论创建时间升序
-  getComments: function getComments (postId) {
-    return Comment
-      .find({ postId: postId })
-      .populate({ path: 'author', model: 'User' })
-      .sort({ _id: 1 })
+  // 通过文章 id 获取该文章下所有评论，按评论创建时间降序
+  getComments: function getComments(postId) {
+    return Comment.find({ postId: postId })
+      .populate({ path: "user", model: "Users" })
+      .sort({ _id: -1 })
       .addCreatedAt()
       .contentToHtml()
-      .exec()
+      .exec();
   },
 
   // 通过文章 id 获取该文章下评论数
-  getCommentsCount: function getCommentsCount (postId) {
-    return Comment.count({ postId: postId }).exec()
-  }
-}
+  getCommentsCount: function getCommentsCount(postId) {
+    return Comment.count({ postId: postId }).exec();
+  },
+};

@@ -1,41 +1,30 @@
 const sha1 = require("sha1");
 const express = require("express");
 const router = express.Router();
-const Result = require("../utils/result");
-const ResCode = require("../utils/resultcode");
 const UserModel = require("../models/users");
+const ResCode = require("../utils/resultcode");
+const { success, failure } = require("../utils/result");
 const { checkLogin } = require("../middlewares/check");
 
-const other = {
-  info: "数据库查询出错",
-};
-
 // GET /users/getInfo 返回指定用户信息
-router.get("/getInfo", checkLogin, function (req, res) {
+router.get("/getInfo", checkLogin, function (req, res, next) {
   const userId = req.user._id;
 
   UserModel.getUserByID(userId)
     .then(function (user) {
       // 用户不存在，返回错误信息
       if (!user) {
-        return Result.failure(res, ResCode.USER_NOT_EXIST);
+        return failure(res, ResCode.USER_NOT_EXIST);
       }
 
       // 用户存在, 返回用户信息
-      return Result.success(res, ResCode.SUCCESS, user);
+      return success(res, ResCode.SUCCESS, user);
     })
-    .catch(function () {
-      return Result.failure(
-        res,
-        ResCode.SERVER_INTERNAL_ERROR,
-        undefined,
-        other
-      );
-    });
+    .catch(next);
 });
 
 // POST /users/changepw  修改密码信息
-router.post("/changepw", checkLogin, function (req, res) {
+router.post("/changepw", checkLogin, function (req, res, next) {
   const userId = req.user._id;
   const { password, repassword } = req.fields;
 
@@ -54,36 +43,26 @@ router.post("/changepw", checkLogin, function (req, res) {
     UserModel.getUserByID(userId)
       .then(function (user) {
         if (!user) {
-          return Result.failure(res, ResCode.USER_NOT_EXIST);
+          return failure(res, ResCode.USER_NOT_EXIST);
         }
 
         UserModel.changeUserPW(userId, sha1(password))
           .then(function () {
-            other.info = "修改密码成功";
+            const other = {
+              info: "修改密码成功",
+            };
 
-            return Result.success(res, ResCode.SUCCESS, undefined, other);
+            return success(res, ResCode.SUCCESS, undefined, other);
           })
-          .catch(function () {
-            return Result.failure(
-              res,
-              ResCode.SERVER_INTERNAL_ERROR,
-              undefined,
-              other
-            );
-          });
+          .catch(next);
       })
-      .catch(function () {
-        return Result.failure(
-          res,
-          ResCode.SERVER_INTERNAL_ERROR,
-          undefined,
-          other
-        );
-      });
+      .catch(next);
   } catch (e) {
-    other.info = e.message;
+    const other = {
+      info: e.message,
+    };
 
-    return Result.failure(res, ResCode.PARAM_IS_INVALID, undefined, other);
+    return failure(res, ResCode.PARAM_IS_INVALID, undefined, other);
   }
 });
 

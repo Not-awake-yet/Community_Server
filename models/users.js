@@ -6,10 +6,10 @@ module.exports = {
         return User.create(user).exec();
     },
 
-    // 通过ID获取用户信息
-    getUserByID: function getUserByID (id) {
+    // 通过账号 account获取用户信息
+    getUserByAC: function getUserByAc (account) {
         return User
-            .findOne({ _id: id })
+            .findOne({ account: account })
             .addCreatedAt()
             .exec()
     },

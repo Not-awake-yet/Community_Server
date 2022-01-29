@@ -48,51 +48,80 @@ module.exports = {
     return Post.create(post).exec();
   },
 
-  // 通过文章 Id 返回文章
-  getPostById: function getPostById(author, postId) {
-    return Post.findOne({ $and: [{ _id: postId }, { author: author }] })
-      .populate({ path: "author", model: "Users" })
+  // 返回社区所有转换后的文章或某一用户的所有转换后的文章
+  getPosts: function getPosts(author) {
+    const query = {};
+    if (author) {
+      query.author = author;
+    }
+    return Post.find(query)
+      .populate({ path: "author", model: "User" })
       .populate({ path: "type", model: "Types" })
+      .sort({ _id: -1 })
+      .addCreatedAt()
+      .addCommentsCount()
+      .contentToHtml()
       .exec();
   },
 
-  // 通过文章类型，按照时间降序返回某一类型的文章
-  getPostsByType: function getPostsByType(author, typeId) {
-    return Post.find({ $and: [{ author: author }, { type: typeId }] })
+  // 通过文章 id 获取一篇转换后的文章
+  getPostById: function getPostById(postId) {
+    return Post.findOne({ _id: postId })
+      .populate({ path: "author", model: "User" })
+      .populate({ path: "type", model: "Types" })
+      .addCreatedAt()
+      .addCommentsCount()
+      .contentToHtml()
+      .exec();
+  },
+
+  // 通过文章类型，按照时间降序返回某一类型转换后的文章
+  getPostsByType: function getPostsByType(typeId) {
+    return Post.find({ type: typeId })
       .populate({ path: "author", model: "Users" })
       .populate({ path: "type", model: "Types" })
       .sort({ _id: -1 })
+      .addCreatedAt()
+      .addCommentsCount()
+      .contentToHtml()
       .exec();
   },
 
-  // 通过时间，返回某一特定时间的文章
-  getPostsByTime: function getPostsByTime(author, createDate) {
-    return Post.find({
-      $and: [
-        { author: author },
-        { createDate: { $regex: `^.*${createDate}.*$` } },
-      ],
-    })
+  // 通过文章 id 返回文章原始内容（方便用户再次编辑）
+  getRawPostById: function getRawPostById(postId) {
+    return Post.findOne({ _id: postId })
       .populate({ path: "author", model: "Users" })
       .populate({ path: "type", model: "Types" })
-      .sort({ _id: -1 })
       .exec();
   },
 
-  // 通过文章 Id 返回文章原始内容
-  getRawPostById: function getRawPostById(author, postId) {
-    return Post.findOne({ $and: [{ author: author }, { _id: postId }] })
-      .populate({ path: "author", model: "Users" })
-      .exec();
-  },
-
-  // 修改文章内容
+  // 修改某一篇文章
   editPostById: function updatePostById(postId, data) {
     return Post.update({ _id: postId }, { $set: data }).exec();
   },
 
-  // 通过文章 Id 删除一篇文章
+  // 通过文章 id 删除一篇文章
   delPostById: function delPostById(postId) {
-    return Post.deleteOne({ _id: postId }).exec();
+    return Post.deleteOne({ _id: postId })
+      .exec()
+      .then(function (res) {
+        // 文章删除后，再删除该文章下的所有留言
+        if (res.result.ok && res.result.n > 0) {
+          return CommentModel.delCommentsByPostId(postId);
+        }
+      });
   },
+
+  // 通过文章 id 给浏览数 views 加 1
+  incViews: function incViews(postId) {
+    return Post.update({ _id: postId }, { $inc: { views: 1 } }).exec();
+  },
+
+  // 通过文章 id 给点赞数 likes 加 1
+  incLikes: function incLikes(postId) {
+    return Post.update({ _id: postId }, { $inc: { likes: 1 } }).exec();
+  },
+
+  // 搜索文章
+  searchPost: function searchPost(content) {},
 };

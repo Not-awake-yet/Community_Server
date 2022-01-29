@@ -1,12 +1,12 @@
 const sha1 = require("sha1");
 const express = require("express");
 const router = express.Router();
-
-const ResultInfo = require("../utils/result");
+const ResCode = require("../utils/resultcode");
 const UserModel = require("../models/users");
+const { success, failure } = require("../utils/result");
 
 // POST /signup 注册页
-router.post("/", function (req, res) {
+router.post("/", function (req, res, next) {
   const name = req.fields.name;
   const account = req.fields.account;
   let password = req.fields.password;
@@ -24,66 +24,38 @@ router.post("/", function (req, res) {
       throw new Error("两次输入的密码不一致");
     }
   } catch (e) {
-    // 注册失败，返回错误信息
-    return res.json({
-      status: "failure",
-      result: {
-        code: ResultInfo.PARAM_IS_INVALID.code,
-        message: {
-          type: ResultInfo.PARAM_IS_INVALID.message,
-          info: e.message,
-        },
-      },
-    });
+    // 参数校验失败(参数不合法)，返回错误信息
+    const other = {
+      info: e.message,
+    };
+
+    return failure(res, ResCode.PARAM_IS_INVALID, undefined, other);
   }
 
   // 校验通过, 将密码进行加密，存储用户信息至数据库
   password = sha1(password);
 
-  let user = {
-    name: name,
-    account: account,
-    password: password,
+  const user = {
+    name,
+    account,
+    password,
   };
+
   UserModel.create(user)
     .then(function (data) {
       // 插入信息成功, 返回成功的状态
-      return res.json({
-        status: "success",
-        result: {
-          code: ResultInfo.REGISTERED_SUCCESS.code,
-          message: {
-            type: ResultInfo.REGISTERED_SUCCESS.message,
-            info: data.ops[0].name,
-          },
-        },
-      });
+      const other = {
+        info: data.ops[0].name + "，注册成功",
+      };
+
+      return success(res, ResCode.SUCCESS, undefined, other);
     })
     .catch(function (e) {
       // 插入信息失败，返回失败的信息
-
       if (e.message.match("duplicate key")) {
-        return res.json({
-          status: "failure",
-          result: {
-            code: ResultInfo.USER_HAS_EXISTED.code,
-            message: {
-              type: ResultInfo.USER_HAS_EXISTED.message,
-              info: "",
-            },
-          },
-        });
+        return failure(res, ResCode.USER_HAS_EXISTED);
       } else {
-        return res.json({
-          status: "failure",
-          result: {
-            code: ResultInfo.OTHER_ERROR.code,
-            message: {
-              type: ResultInfo.OTHER_ERROR.message,
-              info: e.message,
-            },
-          },
-        });
+        next(e);
       }
     });
 });

@@ -8,7 +8,7 @@ module.exports = function (app) {
   // 登录接口
   app.use("/signin", require("./signin"));
 
-  // 内容相关接口
+  // 文章相关接口
   app.use("/posts", require("./posts"));
 
   // 类型相关接口
@@ -18,15 +18,16 @@ module.exports = function (app) {
   app.use("/users", require("./users"));
 
   // 评论相关接口
-  app.use('/comments', require('./comments'));
+  app.use("/comments", require("./comments"));
+
+  // 收藏相关接口
+  app.use("/collects", require("./collects"));
 
   // 定义404处理机制
   app.use(function (req, res) {
-    // console.log(res.headersSend);
-
     if (!res.headersSend) {
       res.status(404);
-      return failure(res, API_NOT_EXIST)
+      return failure(res, API_NOT_EXIST);
     }
   });
 };
