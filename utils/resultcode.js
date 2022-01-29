@@ -18,6 +18,7 @@ module.exports = {
   USER_NOT_LOGGED: new ResultCode(4006, "用户未登录"),
   USER_NOT_EXIST: new ResultCode(4007, "该用户不存在"),
   USER_HAS_EXISTED: new ResultCode(4008, "该用户已存在"),
+  POST_NOT_EXIT: new ResultCode(4009, "请求的文章不存在"),
 
   // 服务端内部错误
   SERVER_INTERNAL_ERROR: new ResultCode(5001, "服务器出错"),
