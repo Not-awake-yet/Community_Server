@@ -4,8 +4,46 @@ const PostModel = require("../models/posts");
 const ResCode = require("../utils/resultcode");
 const { success, failure } = require("../utils/result");
 const { checkLogin } = require("../middlewares/check");
+const { upPic } = require("../middlewares/uppic");
 
-// POST /posts/create 添加一篇文章
+// GET /posts/all 查看社区或某一用户的所有文章
+// eg: GET /posts?author=xxx
+router.get("/", function (req, res, next) {
+  const author = req.query.author;
+
+  PostModel.getPosts(author)
+    .then(function (posts) {
+      return success(res, ResCode.SUCCESS, posts);
+    })
+    .catch(next);
+});
+
+// GET /posts/one/:postId 查看一篇文章
+router.get("/one/:postId", checkLogin, function (req, res, next) {
+  const postId = req.params.postId;
+
+  Promise.all([
+    PostModel.getPostById(postId), // 获取文章具体信息
+    CommentModel.getComments(postId), // 获取该文章所有评论
+    PostModel.incViews(postId), // 浏览数加 1
+  ])
+    .then(function (result) {
+      const post = result[0];
+      const comments = result[1];
+      if (!post) {
+        throw new Error("该文章不存在");
+      }
+
+      const data = {
+        post: post,
+        comments: comments,
+      };
+      return success(res, ResCode.SUCCESS, data);
+    })
+    .catch(next);
+});
+
+// POST /posts/create 新建一篇文章
 router.post("/create", checkLogin, function (req, res, next) {
   const author = req.user._id;
   const { title, content, typeId } = req.fields;
@@ -83,7 +121,7 @@ router.get("/:postId/remove", checkLogin, function (req, res, next) {
           info: e.message,
         };
 
-        failure(res, ResCode.PARAM_IS_INVALID, undefined, other);
+        return failure(res, ResCode.PARAM_IS_INVALID, undefined, other);
       }
     })
     .catch(next);
@@ -144,20 +182,25 @@ router.post("/:postId/edit", checkLogin, function (req, res, next) {
   }
 });
 
-// GET /posts/:postId 查看一篇文章
-router.get("/:postId", checkLogin, function (req, res, next) {
-  const postId = req.params.postId;
+// GET /posts/:content/search 搜索文章
+router.get("/:content/search", checkLogin, function (req, res, next) {
+  const content = req.params.content;
 
-  PostModel.getPostById(postId)
-    .then(function (post) {
-      if (!post) {
-        return failure(res, ResCode.POST_NOT_EXIT);
-      }
+  PostModel.searchPost(content)
+    .then(function (posts) {
+      return success(res, ResCode.SUCCESS, posts);
+    }).catch(next);
+});
 
-      // 文章存在, 返回文章信息
-      return success(res, ResCode.SUCCESS, post);
-    })
-    .catch(next);
+// POST /posts/picture  插入文章图片
+router.post("/picture", checkLogin, upPic, function (req, res) {
+  const picPath = req.picture;
+
+  const other = {
+    info: "图片地址: " + picPath,
+  };
+
+  return success(res, ResCode.SUCCESS, undefined, other);
 });
 
 module.exports = router;

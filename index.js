@@ -13,7 +13,10 @@ const app = express();
 app.use(express.static(__dirname + "/public"));
 
 // 处理请求信息的中间件
-app.use(require("express-formidable")());
+app.use(require("express-formidable")({
+  uploadDir: path.join(__dirname, 'public/img'), // 上传文件目录
+  keepExtensions: true// 保留后缀
+}));
 
 // 正常请求的日志
 app.use(

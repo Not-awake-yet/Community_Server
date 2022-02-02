@@ -5,8 +5,8 @@ const ResCode = require("../utils/resultcode");
 const { success, failure } = require("../utils/result");
 const { checkLogin } = require("../middlewares/check");
 
-// POST /comments 创建一条评论
-router.post("/", checkLogin, function (req, res, next) {
+// POST /comments/create 创建一条评论
+router.post("/create", checkLogin, function (req, res, next) {
   const author = req.user._id;
   const postId = req.fields.postId;
   const content = req.fields.content;
@@ -32,7 +32,7 @@ router.post("/", checkLogin, function (req, res, next) {
 
   CommentModel.create(comment)
     .then(function () {
-      success(res, ResCode.SUCCESS);
+      return success(res, ResCode.SUCCESS);
     })
     .catch(next);
 });
@@ -51,7 +51,11 @@ router.get("/:commentId/remove", checkLogin, function (req, res, next) {
     }
     CommentModel.delCommentById(commentId)
       .then(function () {
-        success(res, ResCode.SUCCESS);
+        const other = {
+          info: "评论删除成功",
+        };
+
+        return success(res, ResCode.SUCCESS, undefined, other);
       })
       .catch(next);
   });

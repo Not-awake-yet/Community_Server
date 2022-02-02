@@ -55,7 +55,7 @@ module.exports = {
       query.author = author;
     }
     return Post.find(query)
-      .populate({ path: "author", model: "User" })
+      .populate({ path: "author", model: "Users" })
       .populate({ path: "type", model: "Types" })
       .sort({ _id: -1 })
       .addCreatedAt()
@@ -67,7 +67,7 @@ module.exports = {
   // 通过文章 id 获取一篇转换后的文章
   getPostById: function getPostById(postId) {
     return Post.findOne({ _id: postId })
-      .populate({ path: "author", model: "User" })
+      .populate({ path: "author", model: "Users" })
       .populate({ path: "type", model: "Types" })
       .addCreatedAt()
       .addCommentsCount()
@@ -117,11 +117,15 @@ module.exports = {
     return Post.update({ _id: postId }, { $inc: { views: 1 } }).exec();
   },
 
-  // 通过文章 id 给点赞数 likes 加 1
-  incLikes: function incLikes(postId) {
-    return Post.update({ _id: postId }, { $inc: { likes: 1 } }).exec();
-  },
-
   // 搜索文章
-  searchPost: function searchPost(content) {},
+  searchPost: function searchPost(content) {
+    return Post.find({ title: { $regex: `^.*${content}.*$` } })
+      .populate({ path: "author", model: "Users" })
+      .populate({ path: "type", model: "Types" })
+      .sort({ _id: -1 })
+      .addCreatedAt()
+      .addCommentsCount()
+      .contentToHtml()
+      .exec();
+  },
 };
