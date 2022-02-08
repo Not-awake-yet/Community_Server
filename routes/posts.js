@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const PostModel = require("../models/posts");
+const CommentModel = require("../models/comments")
 const ResCode = require("../utils/resultcode");
 const { success, failure } = require("../utils/result");
 const { checkLogin } = require("../middlewares/check");
 const { upPic } = require("../middlewares/uppic");
 
-// GET /posts/all 查看社区或某一用户的所有文章
+// GET /posts 查看社区或某一用户的所有文章
 // eg: GET /posts?author=xxx
 router.get("/", function (req, res, next) {
   const author = req.query.author;
@@ -132,7 +133,7 @@ router.post("/:postId/edit", checkLogin, function (req, res, next) {
   const postId = req.params.postId;
   const author = req.user._id;
   const { title, content, typeId } = req.fields;
-
+  
   try {
     if (!title.length) {
       throw new Error("缺失文章题目");
@@ -145,7 +146,7 @@ router.post("/:postId/edit", checkLogin, function (req, res, next) {
     }
 
     // 参数校验通过
-    PostModel.getRawPostById(author, postId)
+    PostModel.getRawPostById(postId)
       .then(function (post) {
         // 文章不存在
         if (!post) {

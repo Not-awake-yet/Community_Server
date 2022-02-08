@@ -20,8 +20,8 @@ module.exports = function (app) {
   // 评论相关接口
   app.use("/comments", require("./comments"));
 
-  // 收藏相关接口
-  app.use("/collects", require("./collects"));
+  // // 收藏相关接口
+  // app.use("/collects", require("./collects"));
 
   // 定义404处理机制
   app.use(function (req, res) {

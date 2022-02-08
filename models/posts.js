@@ -1,3 +1,4 @@
+const { marked } = require('marked');
 const Post = require("../lib/mongo").Posts;
 const CommentModel = require("./comments");
 

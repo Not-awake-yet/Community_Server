@@ -41,8 +41,9 @@ router.post("/", function (req, res, next) {
     }
 
     // 密码匹配成功
-    // 将用户 ID 写入 token, 生成加签后的token
-    const token = jwt.sign({ _id: user._id }, config.key, { expiresIn: "24h" });
+    // 将用户信息写入 token, 生成加签后的token
+    delete user.password;
+    const token = jwt.sign(user, config.key, { expiresIn: "24h" });
 
     const other = {
       info: user.name + "，登录成功",

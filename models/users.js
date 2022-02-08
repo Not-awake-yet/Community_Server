@@ -24,7 +24,7 @@ module.exports = {
     // 修改用户头像
     changeUserAV: function changeUserAV (id, avatar) {
         return User
-            .updateOne({ _id: id}, { $set: { avatar: avatar }})
+            .updateOne({ _id: id }, { $set: { avatar: avatar }})
             .exec()
     },
 

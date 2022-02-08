@@ -1,4 +1,4 @@
-const marked = require("marked");
+const { marked } = require("marked");
 const Comment = require("../lib/mongo").Comments;
 
 // 将 comment 的 content 从 markdown 转换成 html

@@ -7,7 +7,7 @@ const { checkLogin } = require("../middlewares/check");
 
 // POST /comments/create 创建一条评论
 router.post("/create", checkLogin, function (req, res, next) {
-  const author = req.user._id;
+  const user = req.user._id;
   const postId = req.fields.postId;
   const content = req.fields.content;
 
@@ -25,7 +25,7 @@ router.post("/create", checkLogin, function (req, res, next) {
   }
 
   const comment = {
-    author: author,
+    user: user,
     postId: postId,
     content: content,
   };
@@ -40,13 +40,13 @@ router.post("/create", checkLogin, function (req, res, next) {
 // GET /comments/:commentId/remove 删除一条评论
 router.get("/:commentId/remove", checkLogin, function (req, res, next) {
   const commentId = req.params.commentId;
-  const author = req.user._id;
+  const user = req.user._id;
 
   CommentModel.getCommentById(commentId).then(function (comment) {
     if (!comment) {
       throw new Error("评论不存在");
     }
-    if (comment.author.toString() !== author.toString()) {
+    if (comment.user.toString() !== user.toString()) {
       throw new Error("没有权限删除评论");
     }
     CommentModel.delCommentById(commentId)

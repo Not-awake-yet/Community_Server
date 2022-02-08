@@ -6,17 +6,17 @@ const ResCode = require("../utils/resultcode");
 const { checkLogin } = require("../middlewares/check");
 const { success, failure } = require("../utils/result");
 
-// 创建一个新的文章类型
+// POST /types/create 创建一个新的文章类型
 router.post("/create", checkLogin, function (req, res, next) {
-  const { name } = req.fields;
+  const { typeName } = req.fields;
 
   // 参数校验
-  if (!type) {
+  if (!typeName) {
     return failure(res, ResCode.PARAM_NOT_COMPLETE);
   }
 
   const type = {
-    name,
+    typeName,
   };
 
   // 创建新种类
@@ -25,6 +25,7 @@ router.post("/create", checkLogin, function (req, res, next) {
       const other = {
         info: "添加成功",
       };
+      
       return success(res, ResCode.SUCCESS, undefined, other);
     })
     .catch(next);
@@ -43,7 +44,7 @@ router.get("/alltype", checkLogin, function (req, res, next) {
 // GET /types/:typeId 返回指定种类的所有文章
 router.get("/:typeId", checkLogin, function (req, res, next) {
   const typeId = req.params.typeId;
-
+  
   PostModel.getPostsByType(typeId)
     .then(function (posts) {
       // 查询结果返回

@@ -11,6 +11,7 @@ const { upPic } = require("../middlewares/uppic");
 // GET /users/getInfo 返回指定用户信息
 router.get("/getInfo", checkLogin, function (req, res, next) {
   const account = req.user.account;
+  console.log(req.user);
 
   UserModel.getUserByAC(account)
     .then(function (user) {
@@ -20,6 +21,8 @@ router.get("/getInfo", checkLogin, function (req, res, next) {
       }
 
       // 用户存在, 返回用户信息
+      delete user.password;
+      delete user._id;
       return success(res, ResCode.SUCCESS, user);
     })
     .catch(next);
@@ -70,10 +73,10 @@ router.post("/changepw", checkLogin, function (req, res, next) {
 
 // POST /users/chavatar  修改用户头像
 router.post("/chavatar", checkLogin, upPic, function (req, res, next) {
-  const account = req.user.account;
-  const picPath = req.picture;
+  const _id = req.user._id;
+  const picPath = "img/" + req.picture;
 
-  UserModel.changeUserAV(account, picPath)
+  UserModel.changeUserAV(_id, picPath)
     .then(function () {
       const other = {
         info: "头像: " + picPath,
@@ -86,6 +89,7 @@ router.post("/chavatar", checkLogin, upPic, function (req, res, next) {
 
 // POST /users/changeif  修改用户信息
 router.post("/changeif", checkLogin, function (req, res, next) {
+  const user = req.user._id;
   const info = Object.assign({}, req.fields);
 
   // 判断 info 是否为空
@@ -97,7 +101,7 @@ router.post("/changeif", checkLogin, function (req, res, next) {
     return failure(res, ResCode.PARAM_NOT_COMPLETE, undefined, other);
   }
 
-  UserModel.changeUserInfo(info)
+  UserModel.changeUserInfo(user, info)
     .then(function () {
       return success(res, ResCode.SUCCESS);
     })
@@ -106,13 +110,10 @@ router.post("/changeif", checkLogin, function (req, res, next) {
 
 // GET /users/:postId/collect 收藏一篇文章或取消收藏
 router.get("/:postId/collect", checkLogin, function (req, res, next) {
+  // console.log(req.params.postId);
+
   ColModel.collectOrNot(req.user._id, req.params.postId)
     .then(function () {
-      // 返回附带信息
-      // const other = {
-      //   info: "收藏成功",
-      // };
-
       return success(res, ResCode.SUCCESS);
     })
     .catch(next);

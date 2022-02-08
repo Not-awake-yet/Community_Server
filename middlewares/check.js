@@ -14,7 +14,7 @@ module.exports = {
       if (err) return failure(res, USER_NOT_LOGGED);
 
       // token 验证成功， 将用户信息保存在请求中
-      req.user = user;
+      req.user = user.user;
       next();
     });
   },
