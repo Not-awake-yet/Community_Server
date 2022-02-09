@@ -1,45 +1,9 @@
-## 目前还需要做的工作
+# Sanity Clean Content Studio
 
-### 用户登录
+Congratulations, you have now installed the Sanity Content Studio, an open source real-time content editing environment connected to the Sanity backend.
 
-- 用户登录加密方式
-- 用户登录验证码或邮箱
-- 第三方登录接入
+Now you can do the following things:
 
-- 未完成，后续如有需求再修改
-
-### 用户评论接口
-
-- 已完成
-
-### 用户接口
-
-- 修改用户信息
-- 修改用户头像
-- 收藏文章
-- 返回收藏文章
-- 返回收藏数
-
-已完成
-
-### 文章接口
-
-- 文章接口未支持图片上传
-- 浏览次数
-- 搜索文章
-
-已完成
-
-## 数据返回大致格式
-
-```json
-{
-    status: '',
-    code: USER_NOT_LOGGED.code,
-    message: USER_NOT_LOGGED.message,
-    data: {},
-    other: {
-        info:
-    }
-}
-```
+- [Read “getting started” in the docs](https://www.sanity.io/docs/introduction/getting-started?utm_source=readme)
+- [Join the community Slack](https://slack.sanity.io/?utm_source=readme)
+- [Extend and build plugins](https://www.sanity.io/docs/content-studio/extending?utm_source=readme)
